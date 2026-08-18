@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Join Telegram Channel</title>
+    <style>
+        /* Base Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f5; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Mobile Container (16:9 / 9:16 Aspect) */
+        .mobile-container {
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            max-height: 850px;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            text-align: center;
+            position: relative;
+        }
+
+        /* Logo Styling */
+        .logo {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 3px solid #fff;
+        }
+
+        /* Text Elements */
+        h1 {
+            font-size: 24px;
+            color: #222;
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* Timer Styling */
+        .timer-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px 25px;
+            margin-bottom: 30px;
+            font-size: 18px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .timer-count {
+            font-size: 26px;
+            font-weight: 800;
+            color: #2AABEE; /* Telegram Blue */
+            display: inline-block;
+            min-width: 35px;
+        }
+
+        /* Telegram-style Button */
+        .join-btn {
+            background-color: #2AABEE;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 600;
+            padding: 16px 40px;
+            border-radius: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 85%;
+            box-shadow: 0 6px 15px rgba(42, 171, 238, 0.35);
+            transition: background-color 0.3s;
+            /* Slow Pop Animation */
+            animation: slowPop 2.5s infinite ease-in-out;
+        }
+
+        .join-btn:hover {
+            background-color: #2298d6;
+        }
+
+        /* Hardware-accelerated scale animation for zero lag */
+        @keyframes slowPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+            100% { transform: scale(1); }
+        }
+
+        /* Live Visitors Styling */
+        .live-visitors {
+            margin-top: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #555;
+            background: #f1f3f4;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #ff3b30;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: blink 1.5s infinite ease-in-out;
+        }
+
+        @keyframes blink {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+
+        #visitorCount {
+            font-weight: bold;
+            color: #222;
+            margin: 0 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-container">
+        <!-- Logo -->
+        <img src="https://imgh.in/host/nhxdo3" alt="Channel Logo" class="logo">
+
+        <!-- Headers -->
+        <h1>Exclusive Access</h1>
+        <p class="subtitle">Join our community before the link expires.</p>
+
+        <!-- Redirect Timer -->
+        <div class="timer-box">
+            Redirecting in <span id="timer" class="timer-count">10</span>s
+        </div>
+
+        <!-- Animated Join Button -->
+        <a href="https://t.me/+-J_7zjKqi5M4YjU9" class="join-btn" id="manualJoin">
+            Join Channel Now
+        </a>
+
+        <!-- Live Visitors Counter -->
+        <div class="live-visitors">
+            <div class="live-dot"></div>
+            <span id="visitorCount">247</span> people viewing right now
+        </div>
+    </div>
+
+    <script>
+        // --- Timer & Redirect Logic ---
+        const destLink = "https://t.me/+-J_7zjKqi5M4YjU9";
+        let timeLeft = 10; // Change this number to adjust countdown duration
+        const timerElement = document.getElementById('timer');
+
+        const countdown = setInterval(() => {
+            timeLeft--;
+            timerElement.textContent = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                window.location.href = destLink; // Auto-redirect
+            }
+        }, 1000);
+
+        // --- Live Visitor Simulation ---
+        // Generates a realistic fluctuating viewer count
+        let currentVisitors = Math.floor(Math.random() * (350 - 200 + 1)) + 200; // Base count between 200-350
+        const visitorElement = document.getElementById('visitorCount');
+        visitorElement.textContent = currentVisitors;
+
+        setInterval(() => {
+            // Randomly add or subtract 1-4 visitors every few seconds
+            const change = Math.floor(Math.random() * 7) - 3; 
+            currentVisitors += change;
+            
+            // Ensure the count doesn't drop too low artificially
+            if(currentVisitors < 150) currentVisitors += 15; 
+            
+            visitorElement.textContent = currentVisitors;
+        }, 3500); // Updates every 3.5 seconds
+    </script>
+
+</body>
+</html>
