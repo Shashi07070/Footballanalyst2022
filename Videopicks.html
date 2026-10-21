@@ -32,7 +32,7 @@
 header{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:#0b0f18e8;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
 .brand{display:flex;gap:12px;align-items:center}.mark{width:42px;height:42px;border-radius:12px;background:var(--lime);color:#0e1405;display:grid;place-items:center;font:800 21px 'Space Grotesk'}
 .brand h1{margin:0;font:700 15px 'Space Grotesk'} .brand p{margin:2px 0 0;color:var(--muted);font-size:11px}
-.btns{display:flex;gap:8px}button{padding:11px 16px;border-radius:10px;border:1px solid var(--line);background:#1a2130;color:#fff;font:800 12px 'DM Sans';cursor:pointer}button.primary{background:var(--lime);color:#101500;border-color:var(--lime)}
+.btns{display:flex;gap:8px}button{padding:11px 16px;border-radius:10px;border:1px solid var(--line);background:#1a2130;color:#fff;font:800 12px 'DM Sans';cursor:pointer}button.primary{background:var(--lime);color:#0d120c;border-color:rgba(200,255,56,.5)}
 .layout{max-width:1480px;margin:0 auto;padding:18px;display:grid;grid-template-columns:420px 1fr;gap:18px}
 .panel{background:#0f141f;border:1px solid var(--line);border-radius:16px;padding:16px}
 .panel h2{margin:0 0 12px;font:700 12px 'Space Grotesk';letter-spacing:.1em;color:var(--lime)}
@@ -50,7 +50,7 @@ input[type=range]{width:100%;accent-color:var(--lime)}
 </head>
 <body>
 <header>
-<div class="brand"><div class="mark">FA</div><div><h1>FOOTBALL ANALYST <span style="color:var(--lime)">/ REEL STUDIO</span> V3 • Top Watermark</h1><p>9:16 studio bg • texts over head with SFX • no watch badge • watermark top-middle</p></div></div>
+<div class="brand"><div class="mark">FA</div><div><h1>FOOTBALL ANALYST <span style="color:var(--lime)">/ REEL STUDIO</span> V3 • Top Watermark</h1><p>9:16 studio bg • texts over head with SFX • instant export</p></div></div>
 <div class="btns"><button id="previewBtn">▶ Preview</button><button id="exportBtn" class="primary">● Render & Download</button></div>
 </header>
 <main class="layout">
@@ -87,7 +87,7 @@ input[type=range]{width:100%;accent-color:var(--lime)}
 <div class="timeline">
 <div style="display:flex;justify-content:space-between;font:700 11px 'Space Grotesk';color:var(--muted)"><span id="stageLabel">READY</span><span id="timeLabel">00:00 / 9.0s</span></div>
 <input id="scrubber" type="range" min="0" max="9" step="0.01" value="0">
-<div style="display:flex;gap:6px;margin-top:8px"><button data-time="0" style="font-size:10px">Intro</button><button data-time="1.8" style="font-size:10px">Over</button><button data-time="3.8" style="font-size:10px">Score</button><button data-time="5.8" style="font-size:10px">Winner</button><button data-time="7.5" style="font-size:10px">Final</button></div>
+<div style="display:flex;gap:6px;margin-top:8px"><button data-time="0" style="font-size:10px">Intro</button><button data-time="1.8" style="font-size:10px">Over</button><button data-time="3.8" style="font-size:10px">Score</button><button data-time="5.8" style="font-size:10px">Winner</button><button data-time="7.2" style="font-size:10px">Final</button></div>
 <div id="status" class="status">Upload your image. Texts will animate above head with SFX.</div>
 </div>
 </div>
@@ -98,16 +98,16 @@ const canvas=$('c'); const ctx=canvas.getContext('2d');
 const W=1080, H=1920;
 let bg=null, playing=false, raf=0, last=0, t=0, audioCtx=null, lastPhase=-1;
 function getAudio(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); return audioCtx; }
-function sfxPop(){ try{ const a=getAudio(); const o=a.createOscillator(); const g=a.createGain(); o.type='sine'; o.frequency.setValueAtTime(120,a.currentTime); o.frequency.exponentialRampToValueAtTime(900,a.currentTime+0.14); g.gain.setValueAtTime(0,a.currentTime); g.gain.linearRampToValueAtTime(0.45,a.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.35); o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime+0.4);}catch{}}
-function sfxWhoosh(){ try{ const a=getAudio(); const b=a.createBuffer(1,a.sampleRate*0.22,a.sampleRate); const ch=b.getChannelData(0); for(let i=0;i<ch.length;i++) ch[i]=(Math.random()*2-1)*Math.pow(1-i/ch.length,2.2); const src=a.createBufferSource(); src.buffer=b; const f=a.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1400; f.Q.value=0.8; const g=a.createGain(); g.gain.setValueAtTime(0.5,a.currentTime); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.22); src.connect(f).connect(g).connect(a.destination); src.start(); }catch{}}
-function sfxTick(){ try{ const a=getAudio(); const o=a.createOscillator(); const g=a.createGain(); o.type='square'; o.frequency.value=1100; g.gain.setValueAtTime(0.18,a.currentTime); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.12); o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime+0.12);}catch{}}
-function sfxDeep(){ try{ const a=getAudio(); const o=a.createOscillator(); const g=a.createGain(); o.frequency.setValueAtTime(60,a.currentTime); o.frequency.linearRampToValueAtTime(35,a.currentTime+0.3); g.gain.setValueAtTime(0.5,a.currentTime); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.4); o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime+0.45);}catch{}}
+function sfxPop(){ try{ const a=getAudio(); const o=a.createOscillator(); const g=a.createGain(); o.type='sine'; o.frequency.setValueAtTime(120,a.currentTime); o.frequency.exponentialRampToValueAtTime(270,a.currentTime+0.12); g.gain.setValueAtTime(0.0001,a.currentTime); g.gain.exponentialRampToValueAtTime(0.15,a.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.0001,a.currentTime+0.16); o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime+0.18);}catch(_){} }
+function sfxWhoosh(){ try{ const a=getAudio(); const b=a.createBuffer(1,a.sampleRate*0.22,a.sampleRate); const ch=b.getChannelData(0); for(let i=0;i<ch.length;i++){ const p=i/ch.length; ch[i]=(Math.random()*2-1)*Math.pow(1-p,1.2); } const s=a.createBufferSource(); s.buffer=b; const f=a.createBiquadFilter(); f.type='lowpass'; f.frequency.value=900; const g=a.createGain(); g.gain.setValueAtTime(0.18,a.currentTime); g.gain.exponentialRampToValueAtTime(0.0001,a.currentTime+0.22); s.connect(f); f.connect(g); g.connect(a.destination); s.start(); s.stop(a.currentTime+0.22);}catch(_){} }
+function sfxTick(){ try{ const a=getAudio(); const o=a.createOscillator(); const g=a.createGain(); o.type='square'; o.frequency.value=1100; g.gain.setValueAtTime(0.18,a.currentTime); g.gain.exponentialRampToValueAtTime(0.0001,a.currentTime+0.14); o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime+0.15);}catch(_){} }
+function sfxDeep(){ try{ const a=getAudio(); const o=a.createOscillator(); const g=a.createGain(); o.frequency.setValueAtTime(60,a.currentTime); o.frequency.linearRampToValueAtTime(35,a.currentTime+0.18); g.gain.setValueAtTime(0.14,a.currentTime); g.gain.exponentialRampToValueAtTime(0.0001,a.currentTime+0.25); o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime+0.28);}catch(_){} }
 function val(id){ return $(id).value.trim(); }
-function roundRect(x,y,w,h,r,fill,stroke){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); if(fill){ctx.fillStyle=fill; ctx.fill();} if(stroke){ctx.strokeStyle=stroke; ctx.lineWidth=2; ctx.stroke();} }
+function roundRect(x,y,w,h,r,fill,stroke){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); if(fill){ ctx.fillStyle=fill; ctx.fill(); } if(stroke){ ctx.strokeStyle=stroke; ctx.lineWidth=2; ctx.stroke(); } }
 function cover(img){ const ir=img.width/img.height, cr=W/H; let dw,dh,dx,dy; if(ir>cr){ dh=H; dw=dh*ir; dx=(W-dw)/2; dy=0; } else { dw=W; dh=dw/ir; dx=0; dy=(H-dh)/2; } ctx.drawImage(img,dx,dy,dw,dh); }
 function drawStudio(){
  ctx.clearRect(0,0,W,H);
- if(bg){ cover(bg); } else { const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#1a1740'); g.addColorStop(1,'#0a0a14'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); ctx.fillStyle='#ffffff22'; ctx.font='700 28px Space Grotesk'; ctx.textAlign='center'; ctx.fillText('UPLOAD 9:16 STUDIO IMAGE',W/2,H/2); return; }
+ if(bg){ cover(bg); } else { const g=ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#1a1740'); g.addColorStop(1,'#0a0a14'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); ctx.fillStyle='#ffffff22'; ctx.font='700 20px "Space Grotesk"'; ctx.textAlign='center'; ctx.fillText('STUDIO BACKDROP',W/2,H/2); }
  const vg=ctx.createLinearGradient(0,0,0,900); vg.addColorStop(0,'rgba(0,0,0,0.45)'); vg.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=vg; ctx.fillRect(0,0,W,950);
  const vg2=ctx.createLinearGradient(0,H-450,0,H); vg2.addColorStop(0,'rgba(0,0,0,0)'); vg2.addColorStop(1,'rgba(0,0,0,0.6)'); ctx.fillStyle=vg2; ctx.fillRect(0,H-450,W,450);
 }
@@ -123,12 +123,12 @@ function draw(){
  else if(p<0.60){ phaseIdx=2; tag='CORRECT SCORE'; main=val('score')||'2 - 1'; sub=`EXACT SCORE • ${val('home')}`; accent='#ff3d6c'; }
  else if(p<0.80){ phaseIdx=3; tag='WINNER PICK'; main=val('winner')||val('home'); sub='FULL-TIME WINNER'; accent='#c8ff38'; }
  else { phaseIdx=4; tag='FINAL PICKS'; main=`${val('market')} • ${val('score')}`; sub=`${val('winner')} • ${val('footer')}`; accent='#c8ff38'; }
- if(phaseIdx!==lastPhase && t>0.05){ if(phaseIdx===0){ sfxWhoosh(); sfxDeep(); } else if(phaseIdx===1){ sfxPop(); } else if(phaseIdx===2){ sfxPop(); setTimeout(sfxTick,90); } else if(phaseIdx===3){ sfxWhoosh(); } else { sfxPop(); sfxDeep(); } lastPhase=phaseIdx; }
+ if(phaseIdx!==lastPhase && t>0.05){ if(phaseIdx===0){ sfxWhoosh(); sfxDeep(); } else if(phaseIdx===1){ sfxPop(); } else if(phaseIdx===2){ sfxPop(); setTimeout(sfxTick,90); } else if(phaseIdx===3){ sfxPop(); setTimeout(sfxTick,100); } else { sfxWhoosh(); sfxDeep(); }}
+ lastPhase=phaseIdx;
  const labels=['INTRO','OVER / UNDER','SCORE','WINNER','FINAL']; $('stageLabel').textContent=labels[phaseIdx];
  const boundaries=[0,0.18,0.40,0.60,0.80,1.0];
  let b0=boundaries[phaseIdx], b1=boundaries[phaseIdx+1];
  let lp=(p-b0)/(b1-b0); lp=Math.max(0,Math.min(1,lp));
- // TOP MIDDLE WATERMARK - FIRST so it stays behind? Actually top, draw now
  ctx.save();
  ctx.globalAlpha=0.95;
  const wm = val('watermark') || 'FOOTBALL ANALYST • 2022';
@@ -138,7 +138,6 @@ function draw(){
  ctx.font=`800 18px 'Space Grotesk'`; ctx.fillStyle='#e9f0ff'; ctx.textAlign='center'; ctx.textBaseline='middle';
  ctx.fillText(wm, W/2, topPad+22);
  ctx.restore();
- // main animation zone - above head (y ~ 680)
  const zoneY = 680;
  const pop = easeOutBack(Math.min(1, lp/0.55));
  const fade = easeOutExpo(Math.min(1, lp/0.35));
@@ -176,12 +175,11 @@ function draw(){
  ctx.beginPath(); ctx.arc(0, -32, 3, 0, Math.PI*2); ctx.fillStyle=accent; ctx.fill();
  ctx.restore();
  ctx.restore();
- // footer
  ctx.save(); ctx.font=`600 18px 'Space Grotesk'`; ctx.fillStyle='rgba(203,213,230,0.85)'; ctx.textAlign='center'; ctx.fillText(val('footer')||'', W/2, H-90); ctx.restore();
- $('timeLabel').textContent=`00:00:${t.toFixed(1).padStart(4,'0')} / ${d.toFixed(1)}s`;
+ $('timeLabel').textContent=`00:${Math.floor(t/60).toString().padStart(2,'0')}:${(t%60).toFixed(1).padStart(4,'0')} / ${d.toFixed(1)}s`;
  $('scrubber').max=d; $('scrubber').value=t;
 }
-function play(){ if(t>=parseFloat($('duration').value)) t=0; playing=true; $('previewBtn').textContent='Ⅱ Pause'; getAudio(); last=performance.now(); function loop(now){ if(!playing) return; t+=Math.min(0.05,(now-last)/1000); last=now; if(t>=parseFloat($('duration').value)){ t=parseFloat($('duration').value); draw(); pause(); return; } draw(); raf=requestAnimationFrame(loop);} raf=requestAnimationFrame(loop); }
+function play(){ if(t>=parseFloat($('duration').value)) t=0; playing=true; $('previewBtn').textContent='Ⅱ Pause'; getAudio(); last=performance.now(); function loop(now){ if(!playing) return; const delta=Math.min(0.05,(now-last)/1000); t += delta; last=now; draw(); if(t>=parseFloat($('duration').value)){ playing=false; $('previewBtn').textContent='▶ Preview'; return; } raf=requestAnimationFrame(loop); } raf=requestAnimationFrame(loop); }
 function pause(){ playing=false; cancelAnimationFrame(raf); $('previewBtn').textContent='▶ Preview'; }
 $('previewBtn').onclick=()=>playing?pause():play();
 $('scrubber').oninput=e=>{ pause(); t=parseFloat(e.target.value); draw(); };
@@ -193,22 +191,81 @@ $('bgImage').onchange=e=>{
  const img=new Image(); img.onload=()=>{ bg=img; draw(); $('status').textContent='Studio background loaded.'; }; img.src=url;
 };
 $('exportBtn').onclick=async()=>{
- if(!('MediaRecorder' in window) || !canvas.captureStream){ $('status').textContent='Export not supported in this browser. Use Chrome desktop.'; return; }
- pause(); t=0; lastPhase=-1; draw();
- const stream=canvas.captureStream(30);
- const dest=getAudio().createMediaStreamDestination();
- const combined=new MediaStream([...stream.getVideoTracks(), ...dest.stream.getAudioTracks()]);
- let mime='video/webm;codecs=vp9'; if(!MediaRecorder.isTypeSupported(mime)) mime='video/webm';
- let rec; try{ rec=new MediaRecorder(combined,{mimeType:mime,videoBitsPerSecond:8500000}); } catch{ rec=new MediaRecorder(combined); }
- const chunks=[]; rec.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
- rec.onstop=()=>{ const blob=new Blob(chunks,{type:rec.mimeType}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`FA-reel-${Date.now()}.webm`; a.click(); setTimeout(()=>URL.revokeObjectURL(url),5000); $('exportBtn').disabled=false; $('exportBtn').textContent='● Render & Download'; $('status').textContent='Export complete.'; };
- $('exportBtn').disabled=true; $('exportBtn').textContent='Rendering...';
- rec.start(); playing=true; last=performance.now();
- function loop(now){ if(!playing){ rec.stop(); return; } t+=Math.min(0.05,(now-last)/1000); last=now; draw(); if(t>=parseFloat($('duration').value)){ playing=false; rec.stop(); return; } raf=requestAnimationFrame(loop); }
- raf=requestAnimationFrame(loop);
+  if(!('MediaRecorder' in window) || !canvas.captureStream){
+    $('status').textContent='Export not supported in this browser. Please use Chrome or Edge on desktop.';
+    return;
+  }
+
+  const duration = Math.max(2, parseFloat($('duration').value) || 9);
+  pause();
+  t = 0;
+  lastPhase = -1;
+  draw();
+
+  const stream = canvas.captureStream(30);
+  const audioDest = getAudio().createMediaStreamDestination();
+  const combined = new MediaStream([
+    ...stream.getVideoTracks(),
+    ...audioDest.stream.getAudioTracks()
+  ]);
+
+  let mime = 'video/webm;codecs=vp9';
+  if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm';
+
+  let recorder;
+  try {
+    recorder = new MediaRecorder(combined, { mimeType: mime, videoBitsPerSecond: 8_500_000 });
+  } catch {
+    recorder = new MediaRecorder(combined);
+  }
+
+  const chunks = [];
+  recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+  recorder.onerror = () => {
+    $('status').textContent = 'Export failed. Try reloading the page and using Chrome desktop.';
+    $('exportBtn').disabled = false;
+    $('exportBtn').textContent = '● Render & Download';
+  };
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: recorder.mimeType || 'video/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `FA-reel-${Date.now()}.webm`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    $('status').textContent = 'Render complete. Download started.';
+    $('exportBtn').disabled = false;
+    $('exportBtn').textContent = '● Render & Download';
+  };
+
+  $('exportBtn').disabled = true;
+  $('exportBtn').textContent = 'Rendering...';
+  recorder.start();
+
+  let exportStart = performance.now();
+  let exportRaf = 0;
+  function exportLoop(now){
+    const delta = Math.min(0.05, (now - exportStart)/1000);
+    exportStart = now;
+    t += delta;
+    if (t > duration) {
+      t = duration;
+      draw();
+      recorder.stop();
+      cancelAnimationFrame(exportRaf);
+      return;
+    }
+    draw();
+    exportRaf = requestAnimationFrame(exportLoop);
+  }
+
+  exportRaf = requestAnimationFrame(exportLoop);
 };
 window.addEventListener('load',()=>{ if(!bg){ const img=new Image(); img.crossOrigin='anonymous'; img.onload=()=>{ bg=img; draw(); }; img.src='/mnt/data/photo3773089022510510128.jpeg'; } draw(); });
 draw();
 </script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</body>
 </html>
