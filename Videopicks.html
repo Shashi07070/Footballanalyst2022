@@ -24,14 +24,15 @@
 </style>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Football Analyst — Reel Studio V4 FIXED EXPORT</title>
+<title>Football Analyst — MP4 Export V5</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+<script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
 <style>
 :root{--lime:#c8ff38;--line:#232a37;--muted:#9aa6b9}
 *{box-sizing:border-box}body{margin:0;background:#06080e;color:#fff;font-family:'DM Sans',sans-serif}
 header{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:#0b0f18e8;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
 .brand{display:flex;gap:12px;align-items:center}.mark{width:42px;height:42px;border-radius:12px;background:var(--lime);color:#0e1405;display:grid;place-items:center;font:800 21px 'Space Grotesk'}
-.brand h1{margin:0;font:700 15px 'Space Grotesk'} .brand p{margin:2px 0 0;color:var(--muted);font-size:11px}
 .btns{display:flex;gap:8px}button{padding:11px 16px;border-radius:10px;border:1px solid var(--line);background:#1a2130;color:#fff;font:800 12px 'DM Sans';cursor:pointer}button.primary{background:var(--lime);color:#101500;border-color:var(--lime)}button:disabled{opacity:.6}
 .layout{max-width:1480px;margin:0 auto;padding:18px;display:grid;grid-template-columns:420px 1fr;gap:18px}
 .panel{background:#0f141f;border:1px solid var(--line);border-radius:16px;padding:16px}
@@ -44,21 +45,23 @@ input{background:#080c14;border:1px solid #2a3445;border-radius:8px;padding:10px
 .shell canvas{width:100%;height:100%;display:block;border-radius:12px;background:#000}
 .timeline{width:min(100%,390px);background:#101725;border:1px solid var(--line);border-radius:12px;padding:12px}
 input[type=range]{width:100%;accent-color:var(--lime)}
-.status{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.4}
-.progress{height:4px;background:#1e2636;border-radius:2px;overflow:hidden;margin-top:8px;display:none}.progress div{height:100%;width:0%;background:var(--lime);transition:width .1s linear}
+.status{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5}
+.progress{height:6px;background:#1e2636;border-radius:3px;overflow:hidden;margin-top:8px;display:none}.progress div{height:100%;width:0%;background:var(--lime);transition:width .2s linear}
+.note{font-size:10px;color:#7a8599;margin-top:6px}
 @media(max-width:900px){.layout{grid-template-columns:1fr} .canvas-col{position:static;order:-1}}
 </style>
 </head>
 <body>
 <header>
-<div class="brand"><div class="mark">FA</div><div><h1>FOOTBALL ANALYST <span style="color:var(--lime)">/ REEL STUDIO</span> V4</h1><p>Fixed render • 1080x1920 with audio • top watermark</p></div></div>
-<div class="btns"><button id="previewBtn">▶ Preview</button><button id="exportBtn" class="primary">● Render & Download</button></div>
+<div class="brand"><div class="mark">FA</div><div><h1>FOOTBALL ANALYST <span style="color:var(--lime)">/ MP4 STUDIO</span> V5</h1><p>True MP4 export • 1080x1920 • watermark top-middle</p></div></div>
+<div class="btns"><button id="previewBtn">▶ Preview</button><button id="exportBtn" class="primary">● Render MP4</button></div>
 </header>
 <main class="layout">
 <section>
 <div class="panel">
 <h2>01 / Studio Image (9:16)</h2>
 <div class="grid"><div class="full"><label>Upload 9:16 studio image</label><input type="file" id="bgImage" accept="image/*"></div></div>
+<div class="note">Canvas is fixed 1080x1920. Image covers full background. No splitter.</div>
 </div>
 <div class="panel" style="margin-top:14px">
 <h2>02 / Match</h2>
@@ -71,7 +74,7 @@ input[type=range]{width:100%;accent-color:var(--lime)}
 </div>
 </div>
 <div class="panel" style="margin-top:14px">
-<h2>03 / Picks + Watermark Top</h2>
+<h2>03 / Picks + Top Watermark</h2>
 <div class="grid">
 <div class="field"><label>Over/Under</label><input id="market" value="OVER 2.5 GOALS"></div>
 <div class="field"><label>Market label</label><input id="marketNote" value="TOTAL GOALS"></div>
@@ -90,7 +93,7 @@ input[type=range]{width:100%;accent-color:var(--lime)}
 <input id="scrubber" type="range" min="0" max="9" step="0.01" value="0">
 <div style="display:flex;gap:6px;margin-top:8px"><button data-time="0" style="font-size:10px">Intro</button><button data-time="1.8" style="font-size:10px">Over</button><button data-time="3.8" style="font-size:10px">Score</button><button data-time="5.8" style="font-size:10px">Winner</button><button data-time="7.5" style="font-size:10px">Final</button></div>
 <div class="progress" id="prog"><div id="progBar"></div></div>
-<div id="status" class="status">Ready. Use Chrome/Edge desktop for best export. Upload image to start.</div>
+<div id="status" class="status">MP4 mode ready. First MP4 export will download ffmpeg core (~30MB) once, then it's instant. Use Chrome/Edge desktop.</div>
 </div>
 </div>
 </main>
@@ -101,37 +104,18 @@ const W=1080, H=1920;
 let bg=null, playing=false, raf=0, last=0, t=0, audioCtx=null, dest=null, lastPhase=-1, isExporting=false;
 
 function ensureAudio(){
- if(!audioCtx){ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }
+ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
  if(audioCtx.state==='suspended') audioCtx.resume();
- if(!dest){ dest=audioCtx.createMediaStreamDestination(); }
+ if(!dest) dest=audioCtx.createMediaStreamDestination();
  return {a:audioCtx, d:dest};
 }
 function connectToDest(node){
- try{
-   const {a,d}=ensureAudio();
-   node.connect(a.destination);
-   if(isExporting) node.connect(d);
- }catch{}
+ try{ const {a,d}=ensureAudio(); node.connect(a.destination); if(isExporting) node.connect(d); }catch{}
 }
-function sfxPop(){ try{
- const {a}=ensureAudio(); const o=a.createOscillator(); const g=a.createGain();
- o.type='sine'; o.frequency.setValueAtTime(120,a.currentTime); o.frequency.exponentialRampToValueAtTime(900,a.currentTime+0.14);
- g.gain.setValueAtTime(0,a.currentTime); g.gain.linearRampToValueAtTime(0.5,a.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.35);
- o.connect(g); connectToDest(g); o.start(); o.stop(a.currentTime+0.4);
-}catch{}}
-function sfxWhoosh(){ try{
- const {a}=ensureAudio(); const b=a.createBuffer(1,a.sampleRate*0.22,a.sampleRate); const ch=b.getChannelData(0);
- for(let i=0;i<ch.length;i++) ch[i]=(Math.random()*2-1)*Math.pow(1-i/ch.length,2.2);
- const src=a.createBufferSource(); src.buffer=b; const f=a.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1400; const g=a.createGain(); g.gain.setValueAtTime(0.5,a.currentTime); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.22);
- src.connect(f).connect(g); connectToDest(g); src.start();
-}catch{}}
-function sfxTick(){ try{
- const {a}=ensureAudio(); const o=a.createOscillator(); const g=a.createGain(); o.type='square'; o.frequency.value=1100; g.gain.setValueAtTime(0.2,a.currentTime); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.12); o.connect(g); connectToDest(g); o.start(); o.stop(a.currentTime+0.12);
-}catch{}}
-function sfxDeep(){ try{
- const {a}=ensureAudio(); const o=a.createOscillator(); const g=a.createGain(); o.frequency.setValueAtTime(60,a.currentTime); o.frequency.linearRampToValueAtTime(35,a.currentTime+0.3); g.gain.setValueAtTime(0.5,a.currentTime); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.4); o.connect(g); connectToDest(g); o.start(); o.stop(a.currentTime+0.45);
-}catch{}}
-
+function sfxPop(){ try{ const {a}=ensureAudio(); const o=a.createOscillator(); const g=a.createGain(); o.type='sine'; o.frequency.setValueAtTime(120,a.currentTime); o.frequency.exponentialRampToValueAtTime(900,a.currentTime+0.14); g.gain.setValueAtTime(0,a.currentTime); g.gain.linearRampToValueAtTime(0.5,a.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.35); o.connect(g); connectToDest(g); o.start(); o.stop(a.currentTime+0.4);}catch{}}
+function sfxWhoosh(){ try{ const {a}=ensureAudio(); const b=a.createBuffer(1,a.sampleRate*0.22,a.sampleRate); const ch=b.getChannelData(0); for(let i=0;i<ch.length;i++) ch[i]=(Math.random()*2-1)*Math.pow(1-i/ch.length,2.2); const src=a.createBufferSource(); src.buffer=b; const f=a.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1400; f.Q.value=0.8; const g=a.createGain(); g.gain.setValueAtTime(0.5,a.currentTime); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.22); src.connect(f).connect(g); connectToDest(g); src.start(); }catch{}}
+function sfxTick(){ try{ const {a}=ensureAudio(); const o=a.createOscillator(); const g=a.createGain(); o.type='square'; o.frequency.value=1100; g.gain.setValueAtTime(0.2,a.currentTime); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.12); o.connect(g); connectToDest(g); o.start(); o.stop(a.currentTime+0.12);}catch{}}
+function sfxDeep(){ try{ const {a}=ensureAudio(); const o=a.createOscillator(); const g=a.createGain(); o.frequency.setValueAtTime(60,a.currentTime); o.frequency.linearRampToValueAtTime(35,a.currentTime+0.3); g.gain.setValueAtTime(0.5,a.currentTime); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.4); o.connect(g); connectToDest(g); o.start(); o.stop(a.currentTime+0.45);}catch{}}
 function val(id){ return $(id).value.trim(); }
 function roundRect(x,y,w,h,r,fill,stroke){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); if(fill){ctx.fillStyle=fill; ctx.fill();} if(stroke){ctx.strokeStyle=stroke; ctx.lineWidth=2; ctx.stroke();} }
 function cover(img){ const ir=img.width/img.height, cr=W/H; let dw,dh,dx,dy; if(ir>cr){ dh=H; dw=dh*ir; dx=(W-dw)/2; dy=0; } else { dw=W; dh=dw/ir; dx=0; dy=(H-dh)/2; } ctx.drawImage(img,dx,dy,dw,dh); }
@@ -221,65 +205,110 @@ $('bgImage').onchange=e=>{
  const url=URL.createObjectURL(f);
  const img=new Image(); img.onload=()=>{ bg=img; draw(); $('status').textContent='Studio background loaded.'; }; img.src=url;
 };
+
+// --- MP4 EXPORT LOGIC ---
+let ffmpeg=null, ffmpegLoaded=false;
+async function loadFFmpeg(){
+ if(ffmpegLoaded) return ffmpeg;
+ const {FFmpeg}=FFmpegWASM;
+ const {toBlobURL}=FFmpegUtil;
+ ffmpeg=new FFmpeg();
+ ffmpeg.on('log', ({message})=>{ console.log(message); });
+ ffmpeg.on('progress', ({progress})=>{
+   const pct=Math.round(progress*100);
+   $('status').textContent=`Converting to MP4... ${pct}%`;
+   $('progBar').style.width=pct+'%';
+ });
+ const baseURL='https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+ await ffmpeg.load({
+   coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+   wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+ });
+ ffmpegLoaded=true;
+ return ffmpeg;
+}
+
 $('exportBtn').onclick=async()=>{
- if(!('MediaRecorder' in window) || !canvas.captureStream){ $('status').textContent='Export not supported in this browser. Use Chrome/Edge desktop.'; return; }
+ if(!('MediaRecorder' in window) || !canvas.captureStream){ $('status').textContent='Export not supported. Use Chrome/Edge desktop.'; return; }
  ensureAudio();
  pause(); t=0; lastPhase=-1; isExporting=true; draw();
  $('prog').style.display='block';
  const canvasStream=canvas.captureStream(30);
- // ensure dest has track
  const audioTracks=dest.stream.getAudioTracks();
  const combined=new MediaStream([...canvasStream.getVideoTracks(), ...audioTracks]);
- // mime priority
- let mime='video/webm;codecs=vp9';
- if(!MediaRecorder.isTypeSupported(mime)) mime='video/webm;codecs=vp8';
- if(!MediaRecorder.isTypeSupported(mime)) mime='video/webm';
- if(!MediaRecorder.isTypeSupported(mime)) mime='';
+ // Try MP4 mime first - if supported, we get MP4 directly
+ const mp4Mimes=['video/mp4;codecs=avc1,mp4a.40.2','video/mp4;codecs=avc1','video/mp4'];
+ let mime=null;
+ for(const m of mp4Mimes){ if(MediaRecorder.isTypeSupported(m)){ mime=m; break; } }
+ let useDirectMP4=!!mime;
+ if(!mime){
+   mime='video/webm;codecs=vp9'; if(!MediaRecorder.isTypeSupported(mime)) mime='video/webm;codecs=vp8';
+   if(!MediaRecorder.isTypeSupported(mime)) mime='video/webm';
+ }
  let rec;
  try{
-   rec=mime? new MediaRecorder(combined,{mimeType:mime, videoBitsPerSecond:8000000, audioBitsPerSecond:128000}) : new MediaRecorder(combined,{videoBitsPerSecond:8000000, audioBitsPerSecond:128000});
+   rec=new MediaRecorder(combined,{mimeType:mime, videoBitsPerSecond:8000000, audioBitsPerSecond:128000});
  }catch(e){
-   $('status').textContent='Recorder init failed: '+e.message;
-   isExporting=false; $('prog').style.display='none'; return;
+   $('status').textContent='Recorder failed: '+e.message; isExporting=false; return;
  }
  const chunks=[];
  rec.ondataavailable=e=>{ if(e.data && e.data.size>0) chunks.push(e.data); };
- rec.onstop=()=>{
+ rec.onstop=async()=>{
    isExporting=false;
-   if(chunks.length===0){ $('status').textContent='No data recorded. Try again.'; $('prog').style.display='none'; $('exportBtn').disabled=false; $('exportBtn').textContent='● Render & Download'; return; }
-   const blob=new Blob(chunks,{type:rec.mimeType||'video/webm'});
-   const url=URL.createObjectURL(blob);
-   const a=document.createElement('a');
-   a.href=url; a.download=`FA-reel-1080x1920-${Date.now()}.webm`;
-   document.body.appendChild(a); a.click(); a.remove();
-   setTimeout(()=>URL.revokeObjectURL(url),6000);
-   $('exportBtn').disabled=false; $('exportBtn').textContent='● Render & Download';
-   $('status').innerHTML='Export complete! File saved as WebM (1080x1920). If Instagram needs MP4, upload to <b>cloudconvert.com</b> to convert WebM→MP4. Size: '+(blob.size/1024/1024).toFixed(2)+' MB';
+   if(chunks.length===0){ $('status').textContent='No data.'; $('exportBtn').disabled=false; return; }
+   const blob=new Blob(chunks,{type:rec.mimeType});
+   // If we already got MP4 directly, just download
+   if(useDirectMP4){
+     const url=URL.createObjectURL(blob);
+     const a=document.createElement('a'); a.href=url; a.download=`FA-reel-1080x1920-${Date.now()}.mp4`;
+     document.body.appendChild(a); a.click(); a.remove();
+     setTimeout(()=>URL.revokeObjectURL(url),6000);
+     $('exportBtn').disabled=false; $('exportBtn').textContent='● Render MP4';
+     $('status').textContent=`MP4 exported directly! Size ${(blob.size/1024/1024).toFixed(2)} MB`;
+     $('prog').style.display='none'; return;
+   }
+   // Otherwise convert WebM -> MP4 via ffmpeg.wasm
+   try{
+     $('status').textContent='Loading MP4 converter (one-time ~30MB)...';
+     $('exportBtn').textContent='Converting to MP4...';
+     const ff=await loadFFmpeg();
+     const data=new Uint8Array(await blob.arrayBuffer());
+     await ff.writeFile('input.webm', data);
+     // Convert to MP4 with yuv420p for Instagram compatibility
+     await ff.exec(['-i','input.webm','-c:v','libx264','-preset','ultrafast','-pix_fmt','yuv420p','-c:a','aac','-b:a','128k','-movflags','+faststart','output.mp4']);
+     const outData=await ff.readFile('output.mp4');
+     const mp4Blob=new Blob([outData.buffer],{type:'video/mp4'});
+     const url=URL.createObjectURL(mp4Blob);
+     const a=document.createElement('a'); a.href=url; a.download=`FA-reel-1080x1920-${Date.now()}.mp4`;
+     document.body.appendChild(a); a.click(); a.remove();
+     setTimeout(()=>URL.revokeObjectURL(url),6000);
+     $('status').innerHTML=`MP4 ready! ${(mp4Blob.size/1024/1024).toFixed(2)} MB • 1080x1920 • Ready for Instagram Reels.`;
+     await ff.deleteFile('input.webm'); await ff.deleteFile('output.mp4');
+   }catch(err){
+     console.error(err);
+     $('status').innerHTML=`Conversion failed, downloading WebM instead. Error: ${err.message}<br>Convert manually at cloudconvert.com`;
+     const url=URL.createObjectURL(blob);
+     const a=document.createElement('a'); a.href=url; a.download=`FA-reel-${Date.now()}.webm`; a.click(); URL.revokeObjectURL(url);
+   }
+   $('exportBtn').disabled=false; $('exportBtn').textContent='● Render MP4';
    $('prog').style.display='none';
  };
  $('exportBtn').disabled=true; $('exportBtn').textContent='Rendering... 0%';
- $('status').textContent='Rendering in real time with SFX — keep tab active...';
+ $('status').textContent='Rendering reel with SFX... keep tab active.';
  rec.start(100);
  playing=true; last=performance.now();
  function loop(now){
    if(!playing){ try{ rec.stop(); }catch{} return; }
-   t+=Math.min(0.05,(now-last)/1000);
-   last=now;
-   draw();
+   t+=Math.min(0.05,(now-last)/1000); last=now; draw();
    const d=parseFloat($('duration').value)||9;
-   const pct=Math.round((t/d)*100);
-   $('exportBtn').textContent=`Rendering... ${pct}%`;
+   const pct=Math.round((t/d)*100); $('exportBtn').textContent=`Rendering... ${pct}%`;
    if(t>=d){ playing=false; try{ rec.stop(); }catch{} return; }
    raf=requestAnimationFrame(loop);
  }
  raf=requestAnimationFrame(loop);
 };
 window.addEventListener('load',()=>{
- if(!bg){
-   const img=new Image();
-   img.onload=()=>{ bg=img; draw(); };
-   img.src='/mnt/data/photo3773089022510510128.jpeg';
- }
+ if(!bg){ const img=new Image(); img.onload=()=>{ bg=img; draw(); }; img.src='/mnt/data/photo3773089022510510128.jpeg'; }
  draw();
 });
 draw();
